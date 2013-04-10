@@ -1,8 +1,8 @@
 #coding: utf-8
 import sys
-print sys.getdefaultencoding()
+#print sys.getdefaultencoding()
 import codecs
-print u'Hello world! 你好，世界！'
+#print u'Hello world! 你好，世界！'
 
 import collections
 dic=collections.defaultdict(lambda:1)
@@ -45,8 +45,8 @@ def SplitWord(ipt):
 			j = j + 1
 		dp[i] = frqmax
 
-	print dp
-	print idx
+	#print dp
+	#print idx
 
 	w = []
 	i = l - 1
@@ -60,13 +60,15 @@ def SplitWord(ipt):
 
 	w_len = len(w)
 	for i in range(w_len):
-		print w[w_len - i - 1]
+		print w[w_len - i - 1], '|',
 
+	print ''
 
 if __name__ == '__main__':
 	LoadDic()
-	s = u"从一个人"
-	SplitWord(s)
+	for line in file('word-test.txt'):
+		line = line.replace('\n', '')
+		SplitWord(line.decode('utf-8'))
 
 
 
