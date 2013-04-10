@@ -1,36 +1,72 @@
-#coding= utf-8
+#coding: utf-8
 import sys
 print sys.getdefaultencoding()
-reload(sys)
-sys.setdefaultencoding('utf-8')
+import codecs
+print u'Hello world! 你好，世界！'
 
-s = "中文"
-print s
+import collections
+dic=collections.defaultdict(lambda:1)
 
-count = 0
-for line in file('SogouLabDic.dic'):
-	word, frq = line.split('\t')[0:2]
-	dic = {}
-	dic[word] = int(frq)
-	count += int(frq)
-	#print dic[word]
-#print count
+def LoadDic():
+	count = 0
+	for line in file('SogouLabDic.dic'):
+		word, frq = line.split('\t')[0:2]
+		dic[word.decode('utf-8')] = int(frq) + 1
+		count += (int(frq) + 1)
+	dic[u'_t_'] = count
 
 
-inputstring = "明天去开会"
-print inputstring
+def SplitWord(ipt):
 
-l = len(inputstring) 
-p = [1.0 / count for i in range(l)]
-#print p
-for i in range(l):
-	if(i):
-		p[i] *= p[i - 1]
-#print p
+	count = dic[u'_t_']
+	l = len(ipt)
+	dp = [1.0 / count for i in range(l)]
+	idx = [-1 for i in range(l)]
+	#print p
+	for i in range(l):
+		if(i):
+			dp[i] *= dp[i - 1]
 
-for i in range(l):
-	j = 0
-	while j <= i:
-		word = inputstring[j:]
-		j = j + 1
-	#	print word
+	for i in range(l):
+		j = 0
+		frqmax = dp[i]
+		while j <= i:
+			word = ipt[j:i+1]
+			if(dic[word] != 1):
+				if(j > 0):
+					if(frqmax < dp[j - 1] * dic[word] / count):
+						frqmax = dp[j - 1] * dic[word] / count
+						idx[i] = j
+				if(j == 0 or j != i):
+					if(frqmax < dp[j] * dic[word] / count):
+						frqmax = dp[j] * dic[word] / count
+						idx[i] = j	
+			j = j + 1
+
+		dp[i] = frqmax
+
+	print dp
+	print idx
+
+	w = []
+	i = l - 1
+	while i >= 0:
+		if(idx[i] != -1):
+			w.append(ipt[idx[i]: i + 1])
+			i = idx[i] - 1
+		else:
+			w.append(ipt[i:i + 1])	
+			i = i - 1
+
+	w_len = len(w)
+	for i in range(w_len):
+		print w[w_len - i - 1]
+
+
+if __name__ == '__main__':
+	LoadDic()
+	s = u"骂天扯地"
+	SplitWord(s)
+
+
+
