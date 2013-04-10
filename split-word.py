@@ -32,17 +32,17 @@ def SplitWord(ipt):
 		frqmax = dp[i]
 		while j <= i:
 			word = ipt[j:i+1]
-			if(dic[word] != 1):
+			#前面有匹配到的词或匹配自身
+			if(dic[word] != 1 or i == j):
 				if(j > 0):
 					if(frqmax < dp[j - 1] * dic[word] / count):
 						frqmax = dp[j - 1] * dic[word] / count
 						idx[i] = j
-				if(j == 0 or j != i):
+				if(j == 0 and j != i):
 					if(frqmax < dp[j] * dic[word] / count):
 						frqmax = dp[j] * dic[word] / count
 						idx[i] = j	
 			j = j + 1
-
 		dp[i] = frqmax
 
 	print dp
@@ -65,7 +65,7 @@ def SplitWord(ipt):
 
 if __name__ == '__main__':
 	LoadDic()
-	s = u"骂天扯地"
+	s = u"从一个人"
 	SplitWord(s)
 
 
