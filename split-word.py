@@ -9,8 +9,9 @@ dic=collections.defaultdict(lambda:1)
 
 def LoadDic():
 	count = 0
-	for line in file('SogouLabDic.dic'):
-		word, frq = line.split('\t')[0:2]
+	for line in file('dict.txt'):
+		word, frq = line.split(' ')[0:2]
+		#统计词频率
 		dic[word.decode('utf-8')] = int(frq) + 1
 		count += (int(frq) + 1)
 	dic[u'_t_'] = count
@@ -20,6 +21,7 @@ def SplitWord(ipt):
 
 	count = dic[u'_t_']
 	l = len(ipt)
+	#初始状态
 	dp = [1.0 / count for i in range(l)]
 	idx = [-1 for i in range(l)]
 	#print p
@@ -37,10 +39,12 @@ def SplitWord(ipt):
 				if(j > 0):
 					if(frqmax < dp[j - 1] * dic[word] / count):
 						frqmax = dp[j - 1] * dic[word] / count
+						#记录前匹配index
 						idx[i] = j
 				if(j == 0 and j != i):
-					if(frqmax < dp[j] * dic[word] / count):
-						frqmax = dp[j] * dic[word] / count
+					#print frqmax, dic[word] / count
+					if(frqmax < 1.0 * dic[word] / count):
+						frqmax = 1.0 * dic[word] / count
 						idx[i] = j	
 			j = j + 1
 		dp[i] = frqmax
