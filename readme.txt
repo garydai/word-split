@@ -1,1 +1,0 @@
-open txt dic with utf-8 without bom
