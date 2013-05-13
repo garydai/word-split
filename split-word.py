@@ -47,7 +47,7 @@ def LoadDic(filename):
 				trie[word]['s'] = 	trie[word]['s'] + float(frq)
 				trie[word]['sum'] = trie[word]['sum'] + float(frq)
 			else:
-				trie[word] = {'s':float(frq), 'b':0.0, 'e':0.0, 'm':0.0, 'sum':float(frq), 'char':word}
+				trie[word] = {'s':float(frq), 'b':1.0, 'e':1.0, 'm':1.0, 'sum':float(frq), 'char':word}
 			continue
 		i = 0
 		for c in word:
@@ -61,11 +61,11 @@ def LoadDic(filename):
 				trie[c]['sum'] = trie[c]['sum'] + float(frq)
 			else:
 				if i == 0:
-					trie[c] = {'s':0.0, 'b':float(frq), 'e':0.0, 'm':0.0, 'sum':float(frq), 'char':c}
+					trie[c] = {'s':1.0, 'b':float(frq), 'e':1.0, 'm':1.0, 'sum':float(frq), 'char':c}
 				elif i < len(word) - 1:
-					trie[c] = {'s':0.0, 'b':0.0, 'e':0.0, 'm':float(frq), 'sum':float(frq), 'char':c}
+					trie[c] = {'s':1.0, 'b':1.0, 'e':1.0, 'm':float(frq), 'sum':float(frq), 'char':c}
 				elif i == len(word) - 1:
-					trie[c] = {'s':0.0, 'b':0.0, 'e':float(frq), 'm':0.0, 'sum':float(frq), 'char':c}
+					trie[c] = {'s':1.0, 'b':1.0, 'e':float(frq), 'm':1.0, 'sum':float(frq), 'char':c}
 			i = i + 1
 	#print trie[u'啊']
 	global emit_probility
