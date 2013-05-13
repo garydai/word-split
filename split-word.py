@@ -20,16 +20,16 @@ transition_probility = {
 #def create_emit_matrix(word):
 
 #该函数错的,不能只有一个词语决定转移函数,要根据句子的分词情况,e->s也是有概率的
-def create_transiton_matrix(word):
+def create_ini_states(word, freq):
 	global transition_probility_count
 	global initial_states
 	global transition_probility
 	#单字
 	if len(word) == 1:
-		initial_states['s'] = initial_states['s'] + 1
+		initial_states['s'] = initial_states['s'] + freq
 	#多字	
 	if len(word) > 1:
-		initial_states['b'] = initial_states['b'] + 1
+		initial_states['b'] = initial_states['b'] + freq
 
 
 def LoadDic(filename):
@@ -41,11 +41,11 @@ def LoadDic(filename):
 		word = word.decode('utf-8')
 		dic[word] = int(frq) + 1
 		count += (int(frq) + 1)
-		create_transiton_matrix(word)
+		create_ini_states(word, float(frq))
 		if len(word) == 1:
 			if trie.has_key(word):
-				trie[word]['s'] = 	trie[word]['s'] + 1
-				trie[word]['sum'] = trie[word]['sum'] + 1
+				trie[word]['s'] = 	trie[word]['s'] + float(frq)
+				trie[word]['sum'] = trie[word]['sum'] + float(frq)
 			else:
 				trie[word] = {'s':float(frq), 'b':0.0, 'e':0.0, 'm':0.0, 'sum':float(frq), 'char':word}
 			continue
@@ -54,7 +54,7 @@ def LoadDic(filename):
 			if trie.has_key(c):
 				if i == 0:
 					trie[c]['b'] = trie[c]['b'] + float(frq)
-				elif i < len(word) - 2:
+				elif i < len(word) - 1:
 					trie[c]['m'] = trie[c]['m'] + float(frq)
 				elif i == len(word) - 1:
 					trie[c]['e'] = trie[c]['e'] + float(frq)
@@ -62,7 +62,7 @@ def LoadDic(filename):
 			else:
 				if i == 0:
 					trie[c] = {'s':0.0, 'b':float(frq), 'e':0.0, 'm':0.0, 'sum':float(frq), 'char':c}
-				elif i < len(word) - 2:
+				elif i < len(word) - 1:
 					trie[c] = {'s':0.0, 'b':0.0, 'e':0.0, 'm':float(frq), 'sum':float(frq), 'char':c}
 				elif i == len(word) - 1:
 					trie[c] = {'s':0.0, 'b':0.0, 'e':float(frq), 'm':0.0, 'sum':float(frq), 'char':c}
@@ -155,8 +155,15 @@ def Viterbi(initial_states, emit_probility, transition_probility, sentence):
 			s = s + sentence[j] + '|'
 		else:
 			s =  s + sentence[j] 
+		print 's', emit_probility['s'][sentence[j]]
+		print 'b', emit_probility['b'][sentence[j]]
+		print 'e', emit_probility['e'][sentence[j]]
+		print 'm', emit_probility['m'][sentence[j]]
 		j = j + 1
+		emit_probility
 	print s
+	print p
+	print output_state
 
 
 def SplitWord(ipt):
