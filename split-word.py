@@ -8,14 +8,21 @@ import math
 import collections
 dic=collections.defaultdict(lambda:1)
 
-transition_probility = [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]]
+
 initial_states = {'b':0.0, 'm':0.0, 'e':0.0, 's':0.0}
 emit_probility = {'b':{}, 'm':{}, 'e':{}, 's':{}}
+#transition_probility = {
+#'b':{'b':0.0, 'm':0.19922840916814916 , 'e':0.8007715908318509, 's':0.0},
+#'m':{'b':0.0, 'm':0.47583202978061256 , 'e':0.5241679702193874 , 's':0.0},
+#'e':{'b':0.6309567616935934, 'm':0.0 , 'e':0.0, 's':0.36904323830640656},
+#'s':{'b':0.6343402140354506, 'm':0.0 , 'e':0.0, 's':0.36565844303914763},
+#}
+
 transition_probility = {
-'b':{'b':0.0, 'm':0.19922840916814916 , 'e':0.8007715908318509, 's':0.0},
-'m':{'b':0.0, 'm':0.47583202978061256 , 'e':0.5241679702193874 , 's':0.0},
-'e':{'b':0.6309567616935934, 'm':0.0 , 'e':0.0, 's':0.36904323830640656},
-'s':{'b':0.6343402140354506, 'm':0.0 , 'e':0.0, 's':0.36565844303914763},
+'b':{'b':0.0, 'm':0.0 , 'e':0.0, 's':0.0},
+'m':{'b':0.0, 'm':0.0 , 'e':0.0 , 's':0.0},
+'e':{'b':0.0, 'm':0.0 , 'e':0.0, 's':0.0},
+'s':{'b':0.0, 'm':0.0 , 'e':0.0, 's':0.0},
 }
 #def create_emit_matrix(word):
 
@@ -74,13 +81,6 @@ def LoadDic(filename):
 		emit_probility['b'][c] = trie[c]['b'] / trie[c]['sum']
 		emit_probility['e'][c] = trie[c]['e'] / trie[c]['sum']		
 		emit_probility['m'][c] = trie[c]['m'] / trie[c]['sum']
-
-#	print emit_probility
-	f = open('test.txt', 'w+')
-	for i in emit_probility:
-		for j in emit_probility[i]:
-			string = u'%s%f\n'%(j,emit_probility[i][j])
-			f.write(string.encode('utf-8'))
 	
 	summ = initial_states['s'] + initial_states['b'] 
 	initial_states['b'] = initial_states['b'] / summ
@@ -105,7 +105,7 @@ def Viterbi(initial_states, emit_probility, transition_probility, sentence):
 		else:
 			for now_states in states:
 				for last_stete in states:
-					if transition_probility[last_stete][now_states] == 0.0 or emit_probility[now_states][sentence[i]] == 0:
+					if transition_probility[last_stete][now_states] == 0.0 or (not emit_probility[now_states].has_key(sentence[i])) or emit_probility[now_states][sentence[i]] == 0:
 						continue
 					#上一个状态没到达
 					if p[i - 1][last_stete] == 0:
@@ -135,15 +135,6 @@ def Viterbi(initial_states, emit_probility, transition_probility, sentence):
 			char = state
 	output_state = ''
 	for i in range(len(sentence)- 1, -1, -1):
-	#	if char == 'e': 
-		#	print '|'
-		#if char == 's': 
-		#	print '|'
-		#if char == 'b':
-		#	print '|'
-		#print sentence[i]
-		#print char, trace[i][char]		
-		#print char
 		output_state = char + output_state 
 		char = trace[i][char]
 	j = 0
@@ -155,15 +146,15 @@ def Viterbi(initial_states, emit_probility, transition_probility, sentence):
 			s = s + sentence[j] + '|'
 		else:
 			s =  s + sentence[j] 
-		print 's', emit_probility['s'][sentence[j]]
-		print 'b', emit_probility['b'][sentence[j]]
-		print 'e', emit_probility['e'][sentence[j]]
-		print 'm', emit_probility['m'][sentence[j]]
+	#	print 's', emit_probility['s'][sentence[j]]
+	#	print 'b', emit_probility['b'][sentence[j]]
+	#	print 'e', emit_probility['e'][sentence[j]]
+	#	print 'm', emit_probility['m'][sentence[j]]
 		j = j + 1
 		emit_probility
 	print s
-	print p
-	print output_state
+	#print p
+	#print output_state
 
 
 def SplitWord(ipt):
@@ -217,13 +208,80 @@ def SplitWord(ipt):
 
 	print ''
 
+def train(filename):
+	trie = {}
+#	global initial_states
+	global transition_probility
+	for line in file('train_script.txt'):
+		#line = line.replace('\n', '')
+		l = line.decode('utf-8').split('  ')
+		last_state = ''
+		for word in l[:len(l) - 1]:
+			#only one char
+			if len(word) == 1:
+				now_state = 's'
+				if last_state != '':
+					transition_probility[last_state][now_state] = transition_probility[last_state][now_state] + 1
+				last_state = now_state
+#				initial_states['s'] = initial_states['s'] + 1
+				if trie.has_key(word):
+					trie[word]['s'] = trie[word]['s'] + 1
+					trie[word]['sum'] = trie[word]['sum'] + 1
+				else:
+					trie[word] = {'s':2.0, 'b':1.0, 'e':1.0, 'm':1.0, 'sum':1.0, 'char':word}
+			else:
+	#			initial_states['b'] = initial_states['b'] + 1
+				for i in range(len(word)):
+					if i == 0:
+						now_state = 'b'
+					elif i == len(word) - 1:
+						now_state = 'e'
+					else:
+						now_state = 'm'
+					#状态转移矩证
+					if last_state != '':
+						transition_probility[last_state][now_state] = transition_probility[last_state][now_state] + 1
+					#统计字状态
+					if trie.has_key(word[i]):
+						trie[word[i]][now_state] = trie[word[i]][now_state]+ 1
+					else:
+						trie[word[i]] = {'s':1.0, 'b':1.0, 'e':1.0, 'm':1.0, 'sum':1.0, 'char':word}
+						trie[word[i]][now_state] = trie[word[i]][now_state]  + 1	
+					trie[word[i]]['sum'] = trie[word[i]]['sum']  + 1								
+					last_state = now_state	
+
+	states = 'besm'	
+	for c1 in states:
+		summ = transition_probility[c1]['s'] + transition_probility[c1]['m']\
+		+ transition_probility[c1]['b'] + transition_probility[c1]['e']
+		for c2 in states:
+			transition_probility[c1][c2] = transition_probility[c1][c2] / summ
+
+	print transition_probility
+#	global emit_probility
+#	for c in trie:
+#		emit_probility['s'][c] = trie[c]['s'] / trie[c]['sum']
+#		emit_probility['b'][c] = trie[c]['b'] / trie[c]['sum']
+#		emit_probility['e'][c] = trie[c]['e'] / trie[c]['sum']		
+#		emit_probility['m'][c] = trie[c]['m'] / trie[c]['sum']
+
+	#summ = initial_states['s'] + initial_states['b']
+#	initial_states['s'] = initial_states['s'] / summ
+#	initial_states['b'] = initial_states['b'] / summ
+
+
 if __name__ == '__main__':
+	train('train_script.txt')
 	LoadDic('dict.txt')
-	for line in file('word-test.txt'):
+	for line in file('msr_test.txt'):
 		line = line.replace('\n', '')
-		#line  = '你好啊朋友'
-		SplitWord(line.decode('utf-8'))
-		Viterbi(initial_states, emit_probility, transition_probility, line.decode('utf-8'))
+		#line  = '一蹶不振'
+	#		SplitWord(line.decode('utf-8'))
+		lst = line.split(' ')
+		for sentence in lst:
+			if sentence != '':
+				SplitWord(sentence.decode('utf-8'))
+				Viterbi(initial_states, emit_probility, transition_probility, sentence.decode('utf-8'))
 
 
 
